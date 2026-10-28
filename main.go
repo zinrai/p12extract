@@ -12,8 +12,7 @@ import (
 )
 
 func main() {
-	var p12 onceString
-	flag.Var(&p12, "p12", "PKCS#12 file to read")
+	p12 := flag.String("p12", "", "PKCS#12 file to read")
 	showVersion := flag.Bool("version", false, "print the version and exit")
 	flag.Parse()
 
@@ -21,12 +20,12 @@ func main() {
 		printVersion()
 		return
 	}
-	if p12.value == "" || flag.NArg() > 0 {
+	if *p12 == "" || flag.NArg() > 0 {
 		flag.Usage()
 		os.Exit(2)
 	}
 
-	if err := run(p12.value); err != nil {
+	if err := run(*p12); err != nil {
 		fmt.Fprintln(os.Stderr, "p12extract:", err)
 		os.Exit(1)
 	}
