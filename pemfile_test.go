@@ -15,26 +15,21 @@ func TestKeyFileIsWrittenOwnerOnly(t *testing.T) {
 	key := newKey(t)
 	leaf := newCertificate(t, "leaf", key)
 
-	files, err := pemFiles(filepath.Join(t.TempDir(), "client"), key, leaf, nil)
+	dir := t.TempDir()
+	files, err := pemFiles(filepath.Join(dir, "client"), key, leaf, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := writeAllOrNone(files); err != nil {
 		t.Fatal(err)
 	}
-	for _, f := range files {
-		if strings.HasSuffix(f.path, ".key") {
-			info, err := os.Stat(f.path)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if perm := info.Mode().Perm(); perm != 0o600 {
-				t.Errorf("%s perm = %o, want 600", f.path, perm)
-			}
-			return
-		}
+	info, err := os.Stat(filepath.Join(dir, "client.key"))
+	if err != nil {
+		t.Fatal(err)
 	}
-	t.Fatal("no key file")
+	if perm := info.Mode().Perm(); perm != 0o600 {
+		t.Errorf("client.key perm = %o, want 600", perm)
+	}
 }
 
 func TestPemFilesOmitsCAFileWhenThereAreNoCAs(t *testing.T) {
